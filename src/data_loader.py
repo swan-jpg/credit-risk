@@ -1,8 +1,16 @@
 import pandas as pd
 
-def load_data(path):
-    df = pd.read_csv(path)
-    return df 
+def load_data(path, index_column=0):
+    df = pd.read_csv(path, index_col=index_column, na_values=["NA"]) 
+
+    df.columns = df.columns.str.strip()
+
+    df["MonthlyIncome"] = pd.to_numeric(
+        df["MonthlyIncome"].str.strip(),
+        errors="coerce"
+    )
+
+    return df
 
 def data_summary(df): 
     print("\n==================== Shape ====================")
@@ -50,35 +58,18 @@ def duplicates(df):
     print("\n==================== Duplicate Amount ====================")
     print(f"Duplicate Rows: {duplicate_count}")
     return duplicate_count
-
-
-def outlier_check(df):
-    checks = {
-        "age_zero_or_negative": (df["age"] <= 10).sum(),
-        "revolving_util_above_2": (df["RevolvingUtilizationOfUnsecuredLines"] > 2).sum(),
-        "debt_ratio_above_10": (df["DebtRatio"] > 10).sum(),
-        "past_due_96_98_sentinel": (
-            (df["NumberOfTime30-59DaysPastDueNotWorse"] >= 96) |
-            (df["NumberOfTime60-89DaysPastDueNotWorse"] >= 96) |
-            (df["NumberOfTimes90DaysLate"] >= 96)
-        ).sum(),
-    }
-
-    result = pd.Series(checks, name="flagged_count").to_frame()
-    print("\n==================== Outlier / Sanity Checks ====================")
-    print(result)
-
-    return result
-
     
 if __name__  == "__main__":
     from pathlib import Path 
     DATA_PATH = Path("data") / "raw" / "cs-training.csv"
     df = load_data(DATA_PATH) 
 
+    # print(df.columns)
+
     # data_summary(df)
     # summary_statistics(df)
     # duplicates(df)
     # missing_values(df)
-    outlier_check(df)
+
+
    
