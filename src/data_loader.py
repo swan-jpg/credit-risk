@@ -1,18 +1,28 @@
 import pandas as pd
 
 def load_data(path, index_column=0):
-    df = pd.read_csv(path, index_col=index_column, na_values=["NA"]) 
+    """
+    Loads the data
 
+    "MonthlyIncome" column has string values 
+    when it is supposed to be numeric. This 
+    directly fixes the issue. 
+    """
+
+    df = pd.read_csv(path, index_col=index_column, na_values=["NA"]) 
     df.columns = df.columns.str.strip()
 
-    df["MonthlyIncome"] = pd.to_numeric(
-        df["MonthlyIncome"].str.strip(),
-        errors="coerce"
-    )
-
+    df["MonthlyIncome"] = pd.to_numeric(df["MonthlyIncome"].str.strip(),
+                                        errors="coerce")
     return df
 
 def data_summary(df): 
+    """
+    Provides basic info about the dataframe. 
+
+    Meant to serve as a very basic and rudimentary view 
+    of the data. 
+    """
     print("\n==================== Shape ====================")
     print(f"rows: {df.shape[0]}, columns: {df.shape[1]}")
 
@@ -29,7 +39,11 @@ def data_summary(df):
     print(summary) 
     return summary   
                            
-def missing_values(df): 
+def missing_values(df) -> pd.DataFrame:
+    """
+    Return missing value counts and percentages for columns with null values.
+    """
+
     missing = pd.DataFrame({"missing_value_count": df.isnull().sum(),
                             "missing_value_percent": ((df.isnull().sum() / len(df))*100).round(2)
     })
@@ -41,6 +55,9 @@ def missing_values(df):
     return filtered_missing
     
 def summary_statistics(df):
+    """
+    Summary stats + skew and kurtosis
+    """
     stats = df.describe().T
     stats["skew"] = df.skew(numeric_only=True).round(5)
     stats["kurtosis"] = df.kurtosis(numeric_only=True).round(5)
@@ -51,6 +68,9 @@ def summary_statistics(df):
     return stats
 
 def duplicates(df): 
+    """
+    Looks for any duplicated rows
+    """
     duplicate = (df.duplicated())
     # print(duplicate.head(5))
 
