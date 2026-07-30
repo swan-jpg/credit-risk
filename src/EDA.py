@@ -3,8 +3,7 @@
 exploratory_analysis.py
 
 EDA for the Give Me Some Credit dataset (SeriousDlqin2yrs).
-Every function here answers a specific modeling question — nothing is
-plotted or computed just for the sake of it. No data is modified.
+No data is modified.
 
 Findings from this module should be recorded (see `eda_findings` dict
 at the bottom) to directly justify decisions in preprocessing.py.
@@ -180,10 +179,17 @@ def feature_vs_target(df: pd.DataFrame, col: str, target_col: str = TARGET, bins
     print(grouped)
     return grouped
 
-def rank_features_by_signal(df: pd.DataFrame, target_col: str = TARGET) -> pd.Series:
+def rank_features_by_signal(df: pd.DataFrame, target_col: str = TARGET, method="pearson") -> pd.Series:
+    """
+    Takes pearson correlation(point biserial for binary output) 
+    of numeric value columns with target and returns them sorted 
+    with the strongest correlated variables. 
+    """
+    correlations = df.corr(method = method, numeric_only=True)[target_col].drop(target_col)
+    sorted_correlations = correlations.sort_values(ascending=False, key = abs).round(3)
 
-    pass
-
+    print(sorted_correlations)
+    return sorted_correlations
 
 # ---------------------------------------------------------------------
 # 4. Examine Relationships Between Predictors
@@ -191,8 +197,13 @@ def rank_features_by_signal(df: pd.DataFrame, target_col: str = TARGET) -> pd.Se
 
 
 def correlation_matrix(df: pd.DataFrame, method="pearson"):
+    """
+    Computes the Pearson correlation matrix for all numeric features.
+    """
+
     corr = df.corr(method=method, numeric_only=True)
 
+    # testing; remove later
     print("\n==================== Correlation Matrix ====================")
     print(corr.round(2))
 
@@ -200,35 +211,28 @@ def correlation_matrix(df: pd.DataFrame, method="pearson"):
     sns.heatmap(corr, annot=True, fmt=".2f", cmap="coolwarm", center=0)
     plt.title("Correlation Matrix")
     plt.tight_layout()
+
+    # plt.savefig("correlation_heatmap.png")
     plt.show()
 
     return corr
 
-    
 # ---------------------------------------------------------------------
-# 5 & 6. Modeling Challenges + Intuition (synthesis, not new analysis)
+# 5. Summary
 # ---------------------------------------------------------------------
 
 def summarize_findings(df: pd.DataFrame, target_col: str = TARGET) -> dict:
     """
-    Pulls together outputs from the functions above into one structured
-    findings dict which will be
-    the actual deliverable of this module. 
-    
-    It'll be something like this:
-
-    {
-        "target_imbalance_ratio": ...,
-        "recommended_metrics": [...],
-        "features_needing_log_transform": [...],
-        "features_needing_imputation": [...],
-        "features_with_impossible_values": [...],
-        "high_correlation_pairs": [...],
-        "top_predictive_features": [...],
-        "low_signal_features": [...],
-    }
+    Pulls together outputs from the functions above into 
+    one structured findings dict and is the actual 
+    deliverable of this module. 
     """
+
+
     pass
+
+
+
 
 if __name__ == "__main__": 
     from pathlib import Path
@@ -240,27 +244,8 @@ if __name__ == "__main__":
     # feature_distribution(df,"RevolvingUtilizationOfUnsecuredLines")
     # scan_all_features(df)
     # check_data_quality(df)
-    feature_vs_target(df, "RevolvingUtilizationOfUnsecuredLines")
+    # feature_vs_target(df, "RevolvingUtilizationOfUnsecuredLines")
+    # rank_features_by_signal(df, TARGET)
 
     # correlation_matrix(df) 
-
-
-
-
-
-
-
-# def correlation_matrix(df, method="pearson"):
-#     corr = df.corr(method=method, numeric_only=True)
-
-#     print("\n==================== Correlation Matrix ====================")
-#     print(corr.round(2))
-
-#     plt.figure(figsize=(12, 9))
-#     sns.heatmap(corr, annot=True, fmt=".2f", cmap="coolwarm", center=0)
-#     plt.title("Correlation Matrix")
-#     plt.tight_layout()
-#     plt.show()
-
-#     return corr
 
