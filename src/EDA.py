@@ -79,8 +79,8 @@ def feature_distribution(df: pd.DataFrame, col: str) -> dict:
         "mean_median_gap": round(mean_value - median_value,2), 
         "skew": df[col].skew(), 
         "kurtosis": df[col].kurtosis(),
-        "min": min,
-        "max": max,
+        "min": min_value,
+        "max": max_value,
         "range": round(max_value - min_value,2,),
         "std": df[col].std()
         }
@@ -221,18 +221,27 @@ def correlation_matrix(df: pd.DataFrame, method="pearson"):
 # 5. Summary
 # ---------------------------------------------------------------------
 
-def summarize_findings(df: pd.DataFrame, target_col: str = TARGET) -> dict:
-    """
-    Pulls together outputs from the functions above into 
-    one structured findings dict and is the actual 
-    deliverable of this module. 
-    """
+def summary(df: pd.DataFrame, target_col: str = TARGET) -> dict:
+    '''
+    Runs the complete exploratory analysis and return all findings
+    in a single dictionary
+    '''
+    feature_stats = {
+        col: feature_distribution(df, col)
+        for col in df.select_dtypes(include="number").columns
+        if col != target_col
+    }
+    summary_dict = {
+        "target_distribution": target_balance(df, target_col),
+        "feature_statistics": feature_stats,
+        "data_quality": check_data_quality(df),
+        "feature_signal_ranking": rank_features_by_signal(df, target_col),
+        "correlation_matrix": correlation_matrix(df)
+    }
 
 
-    pass
-
-
-
+    # print(summary)
+    return summary
 
 if __name__ == "__main__": 
     from pathlib import Path
@@ -246,6 +255,13 @@ if __name__ == "__main__":
     # check_data_quality(df)
     # feature_vs_target(df, "RevolvingUtilizationOfUnsecuredLines")
     # rank_features_by_signal(df, TARGET)
-
     # correlation_matrix(df) 
 
+
+    # There are slight differences in default rate based on the 
+    # whether or not there are missing values or not
+    # print(df.groupby(df["MonthlyIncome"].isna())["SeriousDlqin2yrs"].mean())
+    # print(df.groupby(df["NumberOfDependents"].isna())["SeriousDlqin2yrs"].mean())
+
+    
+    summary(df,TARGET)
