@@ -4,8 +4,9 @@ def load_data(path, index_column=0):
     """
     Loads the data
 
-    "MonthlyIncome" column has string values 
-    when it is supposed to be numeric. This 
+    "MonthlyIncome" and "Number of dependents"
+    columns has string values when it is 
+    supposed to be numeric. This 
     directly fixes the issue. 
     """
 
@@ -13,6 +14,9 @@ def load_data(path, index_column=0):
     df.columns = df.columns.str.strip()
 
     df["MonthlyIncome"] = pd.to_numeric(df["MonthlyIncome"].str.strip(),
+                                        errors="coerce")
+
+    df["NumberOfDependents"] = pd.to_numeric(df["NumberOfDependents"].str.strip(),
                                         errors="coerce")
     return df
 
@@ -90,6 +94,7 @@ if __name__  == "__main__":
     # summary_statistics(df)
     # duplicates(df)
     # missing_values(df)
+    print(df["NumberOfDependents"].dtype)
 
 
    
