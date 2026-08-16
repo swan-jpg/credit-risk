@@ -18,7 +18,7 @@ def split_data(df, test_size=0.2, random_state=67):
     Splits dataset into training and testing data.
     '''
 
-    train_df, test_df = train_test_split(df, test_size=0.2, 
+    train_df, test_df = train_test_split(df, test_size=test_size, 
                                          stratify=df[TARGET],
                                          random_state=random_state)
 
@@ -54,22 +54,22 @@ def handle_debt_ratio_outlier(train_df, test_df):
     There are enormous outliers in the "DebtRatio" column that
     are primarily caused by ~0 monthly income values. 
 
-    Creates a "ZeroIncome" column in train_df and test_df that 
-    whether or not MonthlyIncome is equal 0. 
-    For the values that have zero income, we impute the debt 
+    Creates a "LowIncome" column in train_df and test_df that 
+    whether or not MonthlyIncome is 0, 1, or NA. 
+    For the values in LowIncome, we impute the debt 
     ratio value using median impute on valid train_df values 
     and then apply to both train_df and test_df
     '''
-    train_df["ZeroIncome"] = (train_df["MonthlyIncome"] <= 0).astype(int)
-    test_df["ZeroIncome"] = (test_df["MonthlyIncome"] <= 0).astype(int)
+    train_df["LowIncome"] = ((train_df["MonthlyIncome"] <= 1) | train_df["MonthlyIncome"].isna()).astype(int)
+    test_df["LowIncome"] = ((test_df["MonthlyIncome"] <= 1) | test_df["MonthlyIncome"].isna()).astype(int)
 
-    train_mask = train_df["MonthlyIncome"] <= 0
-    test_mask = test_df["MonthlyIncome"] <= 0
+    train_mask = (train_df["MonthlyIncome"] <= 1) | (train_df["MonthlyIncome"].isna())
+    test_mask = (test_df["MonthlyIncome"] <= 1) | (test_df["MonthlyIncome"].isna())
 
     train_df.loc[train_mask, "DebtRatio"] = np.nan
     test_df.loc[test_mask, "DebtRatio"] = np.nan 
 
-    valid_train = train_df["MonthlyIncome"] > 0
+    valid_train = train_df["MonthlyIncome"] > 1
     debt_ratio_impute = train_df.loc[valid_train, "DebtRatio"].median()
 
     train_df["DebtRatio"] = train_df["DebtRatio"].fillna(debt_ratio_impute)
@@ -91,43 +91,7 @@ if __name__ == "__main__":
     # 1. Split Data
     # ---------------------------------------------------------
     train_df, test_df = split_data(df)
-    print("TEMPORARYTEMPORARYTEMPORARYTEMPORARYTEMPORARYTEMPORARYTEMPORARY")
-    print(
-    train_df.loc[
-        train_df["DebtRatio"] > 100,
-        ["DebtRatio", "MonthlyIncome"]
-    ].describe())
-    print("TEMPORARYTEMPORARYTEMPORARYTEMPORARYTEMPORARYTEMPORARYTEMPORARY")
-    print(
-    train_df.loc[
-        train_df["DebtRatio"] > 100,
-        ["DebtRatio", "MonthlyIncome"]
-    ].head(20))
-    print("TEMPORARYTEMPORARYTEMPORARYTEMPORARYTEMPORARYTEMPORARYTEMPORARY")
-    print(train_df.loc[
-        (train_df["DebtRatio"] > 100) &
-        (train_df["MonthlyIncome"].isna()),
-        ["DebtRatio", "MonthlyIncome"]
-    ].describe())
-    print("TEMPORARYTEMPORARYTEMPORARYTEMPORARYTEMPORARYTEMPORARYTEMPORARY")
-    print(train_df.loc[
-        (train_df["DebtRatio"] > 100) &
-        (train_df["MonthlyIncome"] > 0),
-        ["DebtRatio", "MonthlyIncome"]
-    ].describe())
-    print("TEMPORARYTEMPORARYTEMPORARYTEMPORARYTEMPORARYTEMPORARYTEMPORARY")
-    print(train_df.loc[
-        (train_df["DebtRatio"] > 100) &
-        (train_df["MonthlyIncome"] > 0),
-        "MonthlyIncome"
-    ].value_counts().sort_index())
-    print("TEMPORARYTEMPORARYTEMPORARYTEMPORARYTEMPORARYTEMPORARYTEMPORARY")
-    print(train_df.loc[
-        (train_df["DebtRatio"] > 100) &
-        (train_df["MonthlyIncome"] > 1),
-        ["DebtRatio", "MonthlyIncome"]
-    ].sort_values("DebtRatio", ascending=False))
-    print("TEMPORARYTEMPORARYTEMPORARYTEMPORARYTEMPORARYTEMPORARYTEMPORARY")
+
     # ---------------------------------------------------------
     # 2. Remove Invalid Ages
     # ---------------------------------------------------------
@@ -177,17 +141,17 @@ if __name__ == "__main__":
     print("Test max:", test_df["DebtRatio"].max())
 
     # ---------------------------------------------------------
-    # 5. Verify zero-income rows were imputed
+    # 5. Verify low-income rows were imputed
     # ---------------------------------------------------------
-    train_zero_income = train_df["ZeroIncome"] == 1
-    test_zero_income = test_df["ZeroIncome"] == 1
+    train_low_income = train_df["LowIncome"] == 1
+    test_low_income = test_df["LowIncome"] == 1
 
-    print("\nZERO-INCOME DEBT RATIO VALUES")
+    print("\nLOW-INCOME DEBT RATIO VALUES")
 
     print(
         "Train:",
         train_df.loc[
-            train_zero_income,
+            train_low_income,
             "DebtRatio"
         ].unique()
     )
@@ -195,7 +159,7 @@ if __name__ == "__main__":
     print(
         "Test:",
         test_df.loc[
-            test_zero_income,
+            test_low_income,
             "DebtRatio"
         ].unique()
     )
@@ -215,16 +179,3 @@ if __name__ == "__main__":
         test_df["DebtRatio"].isna().sum()
     )
 
-    # ---------------------------------------------------------
-    # 7. Inspect remaining maximum
-    # ---------------------------------------------------------
-    print("\nREMAINING MAXIMUM DEBT RATIO")
-
-    print(
-        train_df.loc[
-            train_df["DebtRatio"] == train_df["DebtRatio"].max(),
-            ["MonthlyIncome", "DebtRatio"]
-        ]
-    )
-
-    
