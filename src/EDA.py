@@ -256,6 +256,7 @@ if __name__ == "__main__":
     # feature_vs_target(df, "RevolvingUtilizationOfUnsecuredLines")
     # rank_features_by_signal(df, TARGET)
     # correlation_matrix(df) 
+    # summary(df,TARGET)
 
 
     # There are slight differences in default rate based on the 
@@ -263,5 +264,80 @@ if __name__ == "__main__":
     # print(df.groupby(df["MonthlyIncome"].isna())["SeriousDlqin2yrs"].mean())
     # print(df.groupby(df["NumberOfDependents"].isna())["SeriousDlqin2yrs"].mean())
 
+    from preprocessing import split_data
+    train_df, test_df = split_data(df)
     
-    summary(df,TARGET)
+    print("="*60)
+    print(
+    train_df.loc[
+        train_df["DebtRatio"] > 100,
+        ["DebtRatio", "MonthlyIncome"]
+    ].describe())
+    print("="*60)
+    print(
+    train_df.loc[
+        train_df["DebtRatio"] > 100,
+        ["DebtRatio", "MonthlyIncome"]
+    ].head(20))
+    print("="*60)
+    print(train_df.loc[
+        (train_df["DebtRatio"] > 100) &
+        (train_df["MonthlyIncome"].isna()),
+        ["DebtRatio", "MonthlyIncome"]
+    ].describe())
+    print("="*60)
+    print(train_df.loc[
+        (train_df["DebtRatio"] > 100) &
+        (train_df["MonthlyIncome"] > 0),
+        ["DebtRatio", "MonthlyIncome"]
+    ].describe())
+    print("="*60)
+    print(train_df.loc[
+        (train_df["DebtRatio"] > 100) &
+        (train_df["MonthlyIncome"] > 0),
+        "MonthlyIncome"
+    ].value_counts().sort_index())
+    print("="*60)
+    print(train_df.loc[
+        (train_df["DebtRatio"] > 100) &
+        (train_df["MonthlyIncome"] > 1),
+        ["DebtRatio", "MonthlyIncome"]
+    ].sort_values("DebtRatio", ascending=False))
+    print("="*60)
+    # ---------------------------------------------------------
+    # Inspect remaining maximum
+    # ---------------------------------------------------------
+    print("\nREMAINING MAXIMUM DEBT RATIO")
+
+    print(
+        train_df.loc[
+            train_df["DebtRatio"] == train_df["DebtRatio"].max(),
+            ["MonthlyIncome", "DebtRatio"]
+        ]
+    )
+
+    print(
+    train_df.loc[
+        train_df["DebtRatio"] == train_df["DebtRatio"].max(),
+        ["MonthlyIncome", "DebtRatio", "LowIncome"]
+    ]
+    )
+
+    print(
+        test_df.loc[
+            test_df["DebtRatio"] == test_df["DebtRatio"].max(),
+            ["MonthlyIncome", "DebtRatio", "LowIncome"]
+        ]
+    )
+
+    print(
+        train_df.nlargest(
+            10, "DebtRatio"
+        )[["MonthlyIncome", "DebtRatio", "LowIncome"]]
+    )
+
+    print(
+        test_df.nlargest(
+            10, "DebtRatio"
+        )[["MonthlyIncome", "DebtRatio", "LowIncome"]]
+    )
