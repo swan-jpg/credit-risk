@@ -91,8 +91,20 @@ def handle_revolving_utilization_outlier(train_df, test_df):
 
     return train_df, test_df
 
-def impute_missing(train_df, test_df, col, strategy="median"):
-    pass
+def impute_missing(train_df, test_df, col):
+    '''
+    Imputes missing values using median imputation.
+
+    Takes the median value of the training dataset and 
+    applies that to NA values in the training and 
+    the testing dataset. 
+        
+    '''
+    median_value = train_df[col].median()
+    train_df[col] = train_df[col].fillna(median_value)
+    test_df[col] = test_df[col].fillna(median_value)
+
+    return train_df, test_df
 
 if __name__ == "__main__":
     from pathlib import Path
@@ -141,7 +153,7 @@ if __name__ == "__main__":
     )
 
     # ---------------------------------------------------------
-    # 4. Inspect DebtRatio after handling
+    # 6. Inspect DebtRatio after handling
     # ---------------------------------------------------------
     print("\nDEBT RATIO AFTER HANDLING")
 
@@ -155,7 +167,7 @@ if __name__ == "__main__":
     print("Test max:", test_df["DebtRatio"].max())
 
     # ---------------------------------------------------------
-    # 5. Verify low-income rows were imputed
+    # 7. Verify low-income rows were imputed
     # ---------------------------------------------------------
     train_low_income = train_df["LowIncome"] == 1
     test_low_income = test_df["LowIncome"] == 1
@@ -179,7 +191,7 @@ if __name__ == "__main__":
     )
 
     # ---------------------------------------------------------
-    # 6. Check for remaining missing values
+    # 8. Check for remaining missing values
     # ---------------------------------------------------------
     print("\nMISSING DEBT RATIO VALUES")
 
@@ -194,7 +206,7 @@ if __name__ == "__main__":
     )
 
     # ---------------------------------------------------------
-    # 7. RevolvingUtilization before handling
+    # 9. RevolvingUtilization before handling
     # ---------------------------------------------------------
     print("\nREVOLVING UTILIZATION BEFORE HANDLING")
 
@@ -215,7 +227,7 @@ if __name__ == "__main__":
     )
 
     # ---------------------------------------------------------
-    # 8. Apply RevolvingUtilization outlier function
+    # 10. Apply RevolvingUtilization outlier function
     # ---------------------------------------------------------
     train_df, test_df = handle_revolving_utilization_outlier(
         train_df,
@@ -223,7 +235,7 @@ if __name__ == "__main__":
     )
 
     # ---------------------------------------------------------
-    # 9. RevolvingUtilization after handling
+    # 11. RevolvingUtilization after handling
     # ---------------------------------------------------------
     print("\nREVOLVING UTILIZATION AFTER HANDLING")
 
@@ -242,3 +254,34 @@ if __name__ == "__main__":
         "Test max:",
         test_df["RevolvingUtilizationOfUnsecuredLines"].max()
     )
+    # ---------------------------------------------------------
+    # 12. Impute missing values in MonthlyIncome and NumberOfDependents
+    # ---------------------------------------------------------
+    print("\nIMPUTE NA VALUES IN MONTHLYINCOME AND NUMBEROFDEPENDENTS")
+    train_df, test_df = impute_missing(train_df=train_df, 
+                                       test_df=test_df, 
+                                       col="MonthlyIncome")
+    train_df, test_df = impute_missing(train_df=train_df, 
+                                       test_df=test_df, 
+                                       col="NumberOfDependents")
+
+    # ---------------------------------------------------------
+    # 13. Verify missing values were imputed correctly
+    # ---------------------------------------------------------
+    print("\nVERIFY MISSING VALUES WERE IMPUTED:")
+    print("\nMISSING VALUES AFTER IMPUTATION")
+
+    print("Train:")
+    print(
+        train_df[["MonthlyIncome", "NumberOfDependents"]].isna().sum()
+    )
+
+    print("Test:")
+    print(
+        test_df[["MonthlyIncome", "NumberOfDependents"]].isna().sum()
+    )
+
+    print("MonthlyIncome median:", train_df["MonthlyIncome"].median())
+    print("NumberOfDependents median:", train_df["NumberOfDependents"].median())
+    print("MonthlyIncome mean:", train_df["MonthlyIncome"].mean())
+    print("NumberOfDependents mean:", train_df["NumberOfDependents"].mean())
