@@ -266,78 +266,148 @@ if __name__ == "__main__":
 
     from preprocessing import split_data
     train_df, test_df = split_data(df)
-    
-    print("="*60)
-    print(
-    train_df.loc[
-        train_df["DebtRatio"] > 100,
-        ["DebtRatio", "MonthlyIncome"]
-    ].describe())
-    print("="*60)
-    print(
-    train_df.loc[
-        train_df["DebtRatio"] > 100,
-        ["DebtRatio", "MonthlyIncome"]
-    ].head(20))
-    print("="*60)
-    print(train_df.loc[
-        (train_df["DebtRatio"] > 100) &
-        (train_df["MonthlyIncome"].isna()),
-        ["DebtRatio", "MonthlyIncome"]
-    ].describe())
-    print("="*60)
-    print(train_df.loc[
-        (train_df["DebtRatio"] > 100) &
-        (train_df["MonthlyIncome"] > 0),
-        ["DebtRatio", "MonthlyIncome"]
-    ].describe())
-    print("="*60)
-    print(train_df.loc[
-        (train_df["DebtRatio"] > 100) &
-        (train_df["MonthlyIncome"] > 0),
-        "MonthlyIncome"
-    ].value_counts().sort_index())
-    print("="*60)
-    print(train_df.loc[
-        (train_df["DebtRatio"] > 100) &
-        (train_df["MonthlyIncome"] > 1),
-        ["DebtRatio", "MonthlyIncome"]
-    ].sort_values("DebtRatio", ascending=False))
-    print("="*60)
-    # ---------------------------------------------------------
-    # Inspect remaining maximum
-    # ---------------------------------------------------------
-    print("\nREMAINING MAXIMUM DEBT RATIO")
 
+    # ---------------------------------------------------------
+    # Revolving Utilization Outlier Inspection
+    # ---------------------------------------------------------
+    print("=" * 60)
+    print("REVOLVING UTILIZATION OUTLIERS")
+    print("=" * 60)
+
+    # Summary statistics for values above 1
     print(
         train_df.loc[
-            train_df["DebtRatio"] == train_df["DebtRatio"].max(),
-            ["MonthlyIncome", "DebtRatio"]
-        ]
+            train_df["RevolvingUtilizationOfUnsecuredLines"] > 1,
+            ["RevolvingUtilizationOfUnsecuredLines"]
+        ].describe()
     )
 
-    print(
-    train_df.loc[
-        train_df["DebtRatio"] == train_df["DebtRatio"].max(),
-        ["MonthlyIncome", "DebtRatio", "LowIncome"]
-    ]
-    )
+    print("=" * 60)
+
+    # Distribution across different thresholds
+    thresholds = [1, 1.5, 2, 3, 5, 10, 50, 100, 1000]
+
+    for threshold in thresholds:
+        count = (
+            train_df["RevolvingUtilizationOfUnsecuredLines"] > threshold
+        ).sum()
+
+        print(f"Values > {threshold}: {count}")
+
+    print("=" * 60)
+
+    # Quantiles of the full distribution
+    print("QUANTILES")
 
     print(
-        test_df.loc[
-            test_df["DebtRatio"] == test_df["DebtRatio"].max(),
-            ["MonthlyIncome", "DebtRatio", "LowIncome"]
-        ]
+        train_df["RevolvingUtilizationOfUnsecuredLines"].quantile(
+            [0.90, 0.95, 0.99, 0.995, 0.999]
+        )
     )
+
+    print("=" * 60)
+
+    # Largest values
+    print("TOP 20 VALUES")
 
     print(
         train_df.nlargest(
-            10, "DebtRatio"
-        )[["MonthlyIncome", "DebtRatio", "LowIncome"]]
+            20,
+            "RevolvingUtilizationOfUnsecuredLines"
+        )[["RevolvingUtilizationOfUnsecuredLines"]]
+    )
+
+    print("=" * 60)
+
+    # Maximum value
+    print("MAXIMUM VALUE")
+
+    print(
+        train_df.loc[
+            train_df["RevolvingUtilizationOfUnsecuredLines"]
+            == train_df["RevolvingUtilizationOfUnsecuredLines"].max(),
+            ["RevolvingUtilizationOfUnsecuredLines"]
+        ]
     )
 
     print(
-        test_df.nlargest(
-            10, "DebtRatio"
-        )[["MonthlyIncome", "DebtRatio", "LowIncome"]]
-    )
+    train_df.loc[
+        train_df["RevolvingUtilizationOfUnsecuredLines"] > 1,
+        "RevolvingUtilizationOfUnsecuredLines"
+    ].describe(percentiles=[.25, .5, .75, .90, .95, .99])
+)
+    
+    # print("="*60)
+    # print(
+    # train_df.loc[
+    #     train_df["DebtRatio"] > 100,
+    #     ["DebtRatio", "MonthlyIncome"]
+    # ].describe())
+    # print("="*60)
+    # print(
+    # train_df.loc[
+    #     train_df["DebtRatio"] > 100,
+    #     ["DebtRatio", "MonthlyIncome"]
+    # ].head(20))
+    # print("="*60)
+    # print(train_df.loc[
+    #     (train_df["DebtRatio"] > 100) &
+    #     (train_df["MonthlyIncome"].isna()),
+    #     ["DebtRatio", "MonthlyIncome"]
+    # ].describe())
+    # print("="*60)
+    # print(train_df.loc[
+    #     (train_df["DebtRatio"] > 100) &
+    #     (train_df["MonthlyIncome"] > 0),
+    #     ["DebtRatio", "MonthlyIncome"]
+    # ].describe())
+    # print("="*60)
+    # print(train_df.loc[
+    #     (train_df["DebtRatio"] > 100) &
+    #     (train_df["MonthlyIncome"] > 0),
+    #     "MonthlyIncome"
+    # ].value_counts().sort_index())
+    # print("="*60)
+    # print(train_df.loc[
+    #     (train_df["DebtRatio"] > 100) &
+    #     (train_df["MonthlyIncome"] > 1),
+    #     ["DebtRatio", "MonthlyIncome"]
+    # ].sort_values("DebtRatio", ascending=False))
+    # print("="*60)
+    # # ---------------------------------------------------------
+    # # Inspect remaining maximum
+    # # ---------------------------------------------------------
+    # print("\nREMAINING MAXIMUM DEBT RATIO")
+
+    # print(
+    #     train_df.loc[
+    #         train_df["DebtRatio"] == train_df["DebtRatio"].max(),
+    #         ["MonthlyIncome", "DebtRatio"]
+    #     ]
+    # )
+
+    # print(
+    # train_df.loc[
+    #     train_df["DebtRatio"] == train_df["DebtRatio"].max(),
+    #     ["MonthlyIncome", "DebtRatio", "LowIncome"]
+    # ]
+    # )
+
+    # print(
+    #     test_df.loc[
+    #         test_df["DebtRatio"] == test_df["DebtRatio"].max(),
+    #         ["MonthlyIncome", "DebtRatio", "LowIncome"]
+    #     ]
+    # )
+
+    # print(
+    #     train_df.nlargest(
+    #         10, "DebtRatio"
+    #     )[["MonthlyIncome", "DebtRatio", "LowIncome"]]
+    # )
+
+    # print(
+    #     test_df.nlargest(
+    #         10, "DebtRatio"
+    #     )[["MonthlyIncome", "DebtRatio", "LowIncome"]]
+    # )

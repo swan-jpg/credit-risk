@@ -77,6 +77,20 @@ def handle_debt_ratio_outlier(train_df, test_df):
 
     return train_df, test_df
 
+def handle_revolving_utilization_outlier(train_df, test_df):
+    '''
+    Handle extreme outliers in RevolvingUtilizationOfUnsecuredLines.
+
+    Revolving utilization contains data with a highly skewed upper tail
+    with extreme values reaching 50,708(which is obviously impossible)
+    Values will be capped at 1.5 in order to preserve influence of higher valued 
+    datapoints while also limiting the influence of extreme outliers.
+    '''
+    train_df["RevolvingUtilizationOfUnsecuredLines"] = train_df["RevolvingUtilizationOfUnsecuredLines"].clip(upper=1.5)
+    test_df["RevolvingUtilizationOfUnsecuredLines"] = test_df["RevolvingUtilizationOfUnsecuredLines"].clip(upper=1.5)
+
+    return train_df, test_df
+
 def impute_missing(train_df, test_df, col, strategy="median"):
     pass
 
@@ -179,3 +193,52 @@ if __name__ == "__main__":
         test_df["DebtRatio"].isna().sum()
     )
 
+    # ---------------------------------------------------------
+    # 7. RevolvingUtilization before handling
+    # ---------------------------------------------------------
+    print("\nREVOLVING UTILIZATION BEFORE HANDLING")
+
+    print(
+        train_df["RevolvingUtilizationOfUnsecuredLines"].quantile(
+            [0.90, 0.95, 0.99, 0.995, 0.999]
+        )
+    )
+
+    print(
+        "Train max:",
+        train_df["RevolvingUtilizationOfUnsecuredLines"].max()
+    )
+
+    print(
+        "Test max:",
+        test_df["RevolvingUtilizationOfUnsecuredLines"].max()
+    )
+
+    # ---------------------------------------------------------
+    # 8. Apply RevolvingUtilization outlier function
+    # ---------------------------------------------------------
+    train_df, test_df = handle_revolving_utilization_outlier(
+        train_df,
+        test_df
+    )
+
+    # ---------------------------------------------------------
+    # 9. RevolvingUtilization after handling
+    # ---------------------------------------------------------
+    print("\nREVOLVING UTILIZATION AFTER HANDLING")
+
+    print(
+        train_df["RevolvingUtilizationOfUnsecuredLines"].quantile(
+            [0.90, 0.95, 0.99, 0.995, 0.999]
+        )
+    )
+
+    print(
+        "Train max:",
+        train_df["RevolvingUtilizationOfUnsecuredLines"].max()
+    )
+
+    print(
+        "Test max:",
+        test_df["RevolvingUtilizationOfUnsecuredLines"].max()
+    )
