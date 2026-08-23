@@ -11,6 +11,7 @@ import statsmodels.api as sm
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_curve
 
 BASELINE_FEATURES = [
     "RevolvingUtilizationOfUnsecuredLines",
@@ -52,7 +53,7 @@ def fit_logistic_model(train_df, target_col, features):
 
     X_train, y_train = prepare_features(train_df, target_col,features)
 
-    model = LogisticRegression(max_iter=1000)
+    model = LogisticRegression(max_iter=5000)
     model.fit(X_train, y_train)
 
     return model
@@ -117,9 +118,20 @@ def calculate_roc_auc(y_true, probabilities):
 
 def calculate_ks(y_true, probabilities):
     """
-    Calculate the Kolmogorov-Smirnov statistic.
+    Calculate the Kolmogorov-Smirnov (KS) statistic.
+
+    KS measures the maximum separation between the
+    cumulative distributions of predicted probabilities
+    for defaults and non-defaults.
     """
-    pass
+
+    fpr, tpr, thresholds = roc_curve(y_true, probabilities)
+
+    ks = max(tpr - fpr)
+
+    return ks
+
+
 
 # ============================================================
 # Model Evaluation
@@ -127,11 +139,10 @@ def calculate_ks(y_true, probabilities):
 
 def evaluate_model(y_true, probabilities):
     """
-    Calculate primary model performance metrics.
+    Wrapper for ROC-AUC and KS statistic
     """
 
-    roc_auc = calculate_roc_auc(y_true,probabilities)
-
+    roc_auc = calculate_roc_auc(y_true,probabilities)    
     ks = calculate_ks(y_true,probabilities)
 
     return {
