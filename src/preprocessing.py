@@ -75,6 +75,10 @@ def handle_debt_ratio_outlier(train_df, test_df):
     train_df["DebtRatio"] = train_df["DebtRatio"].fillna(debt_ratio_impute)
     test_df["DebtRatio"] = test_df["DebtRatio"].fillna(debt_ratio_impute)
 
+    # Cap extreme remaining values
+    train_df["DebtRatio"] = train_df["DebtRatio"].clip(upper=10)
+    test_df["DebtRatio"] = test_df["DebtRatio"].clip(upper=10)
+
     return train_df, test_df
 
 def handle_revolving_utilization_outlier(train_df, test_df):
