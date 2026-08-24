@@ -289,3 +289,52 @@ if __name__ == "__main__":
     print("NumberOfDependents median:", train_df["NumberOfDependents"].median())
     print("MonthlyIncome mean:", train_df["MonthlyIncome"].mean())
     print("NumberOfDependents mean:", train_df["NumberOfDependents"].mean())
+
+    # Data quality issue with debt ratio found:
+    # 111 valus in the training set and 17 values in the testing set remained 
+    # with impossibly high debt raito values. These were capped(functionality added to debt 
+    # ratio handling function)
+
+    # train_df.loc[
+    #     train_df["MonthlyIncome"] > 100000,
+    #     [
+    #         "MonthlyIncome",
+    #         "age",
+    #         "DebtRatio",
+    #         "RevolvingUtilizationOfUnsecuredLines",
+    #         "SeriousDlqin2yrs"
+    #     ]
+    # ].sort_values(
+    #     "MonthlyIncome",
+    #     ascending=False
+    # ).head(20)
+
+    # train_df.loc[
+    #     train_df["DebtRatio"] > 10,
+    #     [
+    #         "DebtRatio",
+    #         "MonthlyIncome",
+    #         "age",
+    #         "RevolvingUtilizationOfUnsecuredLines",
+    #         "SeriousDlqin2yrs"
+    #     ]
+    # ].sort_values(
+    #     "DebtRatio",
+    #     ascending=False
+    # ).head(30)
+
+    # train_df.loc[
+    #     train_df["DebtRatio"] > 10,
+    #     [
+    #         "DebtRatio",
+    #         "MonthlyIncome",
+    #         "age",
+    #         "RevolvingUtilizationOfUnsecuredLines",
+    #         "SeriousDlqin2yrs"
+    #     ]
+    # ].sort_values(
+    #     "DebtRatio",
+    #     ascending=False
+    # ).head(30)
+
+    # (test_df["DebtRatio"] > 10).sum()
