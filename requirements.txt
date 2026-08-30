@@ -1,4 +1,8 @@
 pandas
+numpy
+scipy
 matplotlib
-seaborn 
-statsmodel
+seaborn
+statsmodels
+scikit-learn
+jupyter
