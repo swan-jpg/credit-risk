@@ -9,6 +9,8 @@ Findings from this module should be recorded (see `eda_findings` dict
 at the bottom) to directly justify decisions in preprocessing.py.
 """
 
+from pathlib import Path
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -195,28 +197,36 @@ def rank_features_by_signal(df: pd.DataFrame, target_col: str = TARGET, method="
 # 4. Examine Relationships Between Predictors
 # ---------------------------------------------------------------------
 
-
 def correlation_matrix(df: pd.DataFrame, method="pearson"):
     """
-    Computes the Pearson correlation matrix for all numeric features.
+    Computes the correlation matrix for all numeric features
+    and saves the heatmap to outputs/figures/.
     """
 
     corr = df.corr(method=method, numeric_only=True)
 
-    # testing; remove later
+    # Display correlation matrix
     print("\n==================== Correlation Matrix ====================")
     print(corr.round(2))
 
+    # Create figure
     plt.figure(figsize=(12, 9))
     sns.heatmap(corr, annot=True, fmt=".2f", cmap="coolwarm", center=0)
     plt.title("Correlation Matrix")
     plt.tight_layout()
 
-    # plt.savefig("correlation_heatmap.png")
+    # Project root → outputs/figures
+    output_path = Path(__file__).resolve().parent.parent / "outputs" / "figures"
+    output_path.mkdir(parents=True, exist_ok=True)
+
+    # Save figure
+    plt.savefig(output_path / "correlation_matrix.png",
+        dpi=300,
+        bbox_inches="tight")
+
     plt.show()
 
     return corr
-
 # ---------------------------------------------------------------------
 # 5. Summary
 # ---------------------------------------------------------------------
@@ -255,7 +265,7 @@ if __name__ == "__main__":
     # check_data_quality(df)
     # feature_vs_target(df, "RevolvingUtilizationOfUnsecuredLines")
     # rank_features_by_signal(df, TARGET)
-    # correlation_matrix(df) 
+    correlation_matrix(df) 
     # summary(df,TARGET)
 
 
